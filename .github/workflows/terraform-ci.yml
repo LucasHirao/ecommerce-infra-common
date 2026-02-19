@@ -22,6 +22,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check AWS credentials (CI)
+        run: |
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ] || [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ] || [ -z "${{ secrets.AWS_REGION }}" ]; then
+            echo "::error::Configure os secrets no repositório: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION (Settings → Secrets and variables → Actions)"
+            exit 1
+          fi
+          echo "Credenciais AWS configuradas."
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -47,7 +55,6 @@ jobs:
         run: |
           terraform init
           terraform plan -no-color -input=false -out=tfplan
-        continue-on-error: true
 
       - name: Open PR to sandbox
         env:
