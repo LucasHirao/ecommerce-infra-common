@@ -1,0 +1,62 @@
+# CD: executa deploy na branch sandbox (conta Pluralsight sandbox)
+name: Terraform CD
+
+on:
+  push:
+    branches:
+      - sandbox
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+jobs:
+  deploy:
+    name: Deploy to Sandbox
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6"
+          terraform_wrapper: false
+
+      - name: Restore Terraform state
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-state-sandbox
+          path: .
+        continue-on-error: true
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -no-color -input=false -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -no-color -input=false -auto-approve tfplan
+
+      - name: Persist Terraform state
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-state-sandbox
+          path: terraform/*.tfstate*
+          retention-days: 90
