@@ -4,7 +4,7 @@ Infraestrutura Terraform de suporte compartilhada para outros repositórios (pip
 
 ## Recursos
 
-- **Bucket S3** `{account_id}stageterraform`: armazena os stages das pipelines de outros repositórios.
+- **Bucket S3** `{account_id}-stage-terraform`: armazena os stages das pipelines de outros repositórios.
 
 ## Pipeline CI/CD
 

@@ -1,10 +1,10 @@
 # Bucket para armazenar os stages das pipelines de outros repositórios.
-# Nome: <account_id>stageterraform (ex.: 123456789012stageterraform)
+# Nome: <account_id>-stage-terraform (ex.: 123456789012-stage-terraform)
 resource "aws_s3_bucket" "pipeline_stages" {
-  bucket = "${data.aws_caller_identity.current.account_id}stageterraform"
+  bucket = "${data.aws_caller_identity.current.account_id}-stage-terraform"
 
   tags = {
-    Name        = "${data.aws_caller_identity.current.account_id}stageterraform"
+    Name        = "${data.aws_caller_identity.current.account_id}-stage-terraform"
     Description = "Stages das pipelines de outros repositórios"
   }
 }
