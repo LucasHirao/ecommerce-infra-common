@@ -58,19 +58,30 @@ jobs:
           terraform plan -no-color -input=false -out=tfplan
 
       - name: Open PR to sandbox
+        id: open-pr
+        if: success()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set +e
           PR_URL=$(gh pr create --base sandbox --head "${{ github.ref_name }}" \
             --title "Infra: ${{ github.ref_name }} → sandbox" \
             --body "## Terraform CI
+
           - **Branch:** \`${{ github.ref_name }}\`
           - **Commit:** ${{ github.sha }}
-          - Validação e plan executados.
-          Aprove este PR para promover para **sandbox** e disparar o CD." \
-            2>&1) || true
-          if echo "$PR_URL" | grep -q "already exists"; then
-            echo "PR já existe para esta branch."
-          else
+          - Validação e plan executados com sucesso.
+
+          Aprove este PR para promover para **sandbox** e disparar o CD." 2>&1)
+          EXIT=$?
+          set -e
+          if [ $EXIT -eq 0 ]; then
             echo "PR criado: $PR_URL"
+            echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          elif echo "$PR_URL" | grep -qi "already exists"; then
+            EXISTING=$(gh pr view --base sandbox --head "${{ github.ref_name }}" --json url -q .url 2>/dev/null || true)
+            echo "PR já existe para esta branch: $EXISTING"
+          else
+            echo "::error::Falha ao criar PR: $PR_URL"
+            exit 1
           fi
