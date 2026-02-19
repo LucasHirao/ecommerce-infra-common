@@ -17,6 +17,7 @@ jobs:
   deploy:
     name: Deploy to Sandbox
     runs-on: ubuntu-latest
+    environment: sandbox
     defaults:
       run:
         working-directory: terraform

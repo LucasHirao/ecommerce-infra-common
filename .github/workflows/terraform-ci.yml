@@ -14,6 +14,7 @@ jobs:
   validate-and-plan:
     name: Validate & Plan
     runs-on: ubuntu-latest
+    environment: sandbox
     defaults:
       run:
         working-directory: terraform
@@ -25,7 +26,7 @@ jobs:
       - name: Check AWS credentials (CI)
         run: |
           if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ] || [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ] || [ -z "${{ secrets.AWS_REGION }}" ]; then
-            echo "::error::Configure os secrets no repositório: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION (Settings → Secrets and variables → Actions)"
+            echo "::error::Configure AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY e AWS_REGION em Repository secrets ou no environment 'sandbox' (Settings → Secrets and variables → Actions)"
             exit 1
           fi
           echo "Credenciais AWS configuradas."
